@@ -3,7 +3,7 @@ jest.mock('@google-cloud/dialogflow', () => {
   const projectAgentSessionPath = jest.fn().mockReturnValue('session');
   const SessionsClient = jest.fn().mockImplementation(() => ({ detectIntent, projectAgentSessionPath }));
   return { SessionsClient };
-});
+}, { virtual: true });
 
 describe('detectIntent', () => {
   afterEach(() => {

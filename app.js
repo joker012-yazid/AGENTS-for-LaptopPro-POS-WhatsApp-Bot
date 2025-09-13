@@ -2,6 +2,7 @@ const path = require('path');
 const express = require('express');
 const backupRoutes = require('./routes/backup');
 const formSettingsRoutes = require('./routes/formSettings');
+const queueManualRoutes = require('./routes/queueManual');
 const { authenticate } = require('./middleware/auth');
 
 function createApp(db) {
@@ -11,6 +12,7 @@ function createApp(db) {
   app.use(authenticate);
   app.use('/api/backup', backupRoutes);
   app.use('/api/form-settings', formSettingsRoutes);
+  app.use('/api/queue/manual', queueManualRoutes);
   app.use(express.static(path.join(__dirname, 'public')));
   app.use((err, req, res, next) => {
     console.error(err);

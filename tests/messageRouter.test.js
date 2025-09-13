@@ -1,7 +1,7 @@
 const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
-const { createDb, exec, run } = require('../db');
+const { createDb, exec, run, all } = require('../db');
 
 jest.mock('../services/dialogflow', () => ({ detectIntent: jest.fn() }));
 const { detectIntent } = require('../services/dialogflow');
@@ -22,8 +22,7 @@ describe('messageRouter', () => {
     });
 
     const sock = { ev: new EventEmitter(), sendMessage: jest.fn().mockResolvedValue() };
-    const queue = [];
-    messageRouter(sock, db, queue);
+    messageRouter(sock, db);
 
     sock.ev.emit('messages.upsert', { messages: [{ key: { remoteJid: '1@s.whatsapp.net' }, message: { conversation: 'semak status LP-250901-0001' } }] });
     await new Promise(r => setTimeout(r, 10));
@@ -31,5 +30,25 @@ describe('messageRouter', () => {
     expect(sock.sendMessage).toHaveBeenCalledTimes(1);
     const [, msg] = sock.sendMessage.mock.calls[0];
     expect(msg.text).toMatch(/Selesai/);
+  });
+
+  test('queues unknown intent to database', async () => {
+    const db = createDb(':memory:');
+    const migration1 = fs.readFileSync(path.join(__dirname, '..', 'db', 'migrations', '001_init.sql'), 'utf8');
+    await exec(db, migration1);
+    const migration3 = fs.readFileSync(path.join(__dirname, '..', 'db', 'migrations', '003_queue_manual.sql'), 'utf8');
+    await exec(db, migration3);
+
+    detectIntent.mockResolvedValue({ queryText: 'hello', intent: { displayName: 'Unknown' } });
+
+    const sock = { ev: new EventEmitter(), sendMessage: jest.fn().mockResolvedValue() };
+    messageRouter(sock, db);
+
+    sock.ev.emit('messages.upsert', { messages: [{ key: { remoteJid: '1@s.whatsapp.net' }, message: { conversation: 'hello' } }] });
+    await new Promise(r => setTimeout(r, 10));
+
+    const rows = await all(db, 'SELECT * FROM queue_manual');
+    expect(rows.length).toBe(1);
+    expect(rows[0].remote_jid).toBe('1@s.whatsapp.net');
   });
 });

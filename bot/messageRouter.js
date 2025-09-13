@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const { detectIntent } = require('../services/dialogflow');
 const { handleIntent } = require('./handlers/intent');
 
-function messageRouter(sock, db, queue = []) {
+function messageRouter(sock, db) {
   if (!sock.ev) sock.ev = new EventEmitter();
   sock.ev.on('messages.upsert', async ({ messages }) => {
     for (const msg of messages) {
@@ -11,14 +11,12 @@ function messageRouter(sock, db, queue = []) {
       try {
         const lang = process.env.DIALOGFLOW_LANG || 'ms';
         const result = await detectIntent(text, jid, lang);
-        const reply = await handleIntent(result, { db, remoteJid: jid, queue });
+        const reply = await handleIntent(result, { db, remoteJid: jid });
         if (reply) {
           await sock.sendMessage(jid, { text: reply });
         }
       } catch (err) {
-        if (queue && typeof queue.push === 'function') {
-          queue.push({ remoteJid: jid, text, error: err.message });
-        }
+        console.error(err);
       }
     }
   });

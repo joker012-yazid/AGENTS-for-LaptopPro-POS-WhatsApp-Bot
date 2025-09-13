@@ -1,8 +1,8 @@
-const { get } = require('../../db');
+const { get, run } = require('../../db');
 
 const TICKET_REGEX = /^LP-\d{6}-(\d{4})$/;
 
-async function handleIntent(result, { db, remoteJid, queue }) {
+async function handleIntent(result, { db, remoteJid }) {
   const intent = result.intent && result.intent.displayName;
   switch (intent) {
     case 'Semak Status': {
@@ -28,9 +28,11 @@ async function handleIntent(result, { db, remoteJid, queue }) {
     case 'Alamat Kedai':
       return 'Alamat kami: No.1 Jalan Kedai. https://maps.google.com/?q=No.1+Jalan+Kedai';
     default:
-      if (queue && typeof queue.push === 'function') {
-        queue.push({ remoteJid, query: result.queryText, intent });
-      }
+      await run(
+        db,
+        'INSERT INTO queue_manual (remote_jid, last_text, reason) VALUES (?,?,?)',
+        [remoteJid, result.queryText, intent || 'unknown']
+      );
       return null;
   }
 }
