@@ -27,6 +27,7 @@ describe('backup endpoints', () => {
   test('GET /api/backup/customers.xlsx returns excel', async () => {
     const res = await request(app)
       .get('/api/backup/customers.xlsx')
+      .set('x-token', 'admin-token')
       .buffer()
       .parse((res, cb) => {
         res.setEncoding('binary');
@@ -43,6 +44,7 @@ describe('backup endpoints', () => {
   test('GET /api/backup/issues.zip has issues.json', async () => {
     const res = await request(app)
       .get('/api/backup/issues.zip')
+      .set('x-token', 'admin-token')
       .buffer()
       .parse((res, cb) => {
         const chunks = [];

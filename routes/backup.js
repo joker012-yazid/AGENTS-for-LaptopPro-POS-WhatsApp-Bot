@@ -4,10 +4,11 @@ const archiver = require('archiver');
 const path = require('path');
 const fs = require('fs');
 const { all } = require('../db');
+const { requireRole } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/customers.xlsx', async (req, res, next) => {
+router.get('/customers.xlsx', requireRole('admin', 'teknikal'), async (req, res, next) => {
   const db = req.app.get('db');
   const from = req.query.from || null;
   const to = req.query.to || null;
@@ -43,7 +44,7 @@ router.get('/customers.xlsx', async (req, res, next) => {
   }
 });
 
-router.get('/issues.zip', async (req, res, next) => {
+router.get('/issues.zip', requireRole('admin', 'teknikal'), async (req, res, next) => {
   const db = req.app.get('db');
   const { from, to, ticket, jid, search, hasMedia } = req.query;
   try {
