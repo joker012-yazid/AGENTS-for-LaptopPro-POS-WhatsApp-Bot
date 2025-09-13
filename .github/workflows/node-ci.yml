@@ -1,0 +1,95 @@
+name: Node CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Elak kerja berganda pada PR sama
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x, 20.x]
+
+    env:
+      CI: "true"
+      # DB lokasi lalai (boleh override di repo jika perlu)
+      SQLITE_PATH: ./db/app-ci.sqlite
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm  # aktifkan cache npm automatik (berdasarkan lockfile) :contentReference[oaicite:1]{index=1}
+
+      - name: Install build deps for native addons (better-sqlite3)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential python3 make g++ libsqlite3-dev
+        # node-gyp memerlukan Python, make & g++ untuk bina modul native :contentReference[oaicite:2]{index=2}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare folders
+        run: |
+          mkdir -p logs storage/wa-media db/migrations
+
+      - name: Run migrations
+        run: |
+          if [ -f scripts/run-migrations.js ]; then
+            node scripts/run-migrations.js
+          else
+            echo "🛈 scripts/run-migrations.js tiada; langkau."
+          fi
+
+      - name: Seed demo (optional)
+        run: |
+          if [ -f scripts/seed.js ]; then
+            node scripts/seed.js || true
+          else
+            echo "🛈 scripts/seed.js tiada; langkau."
+          fi
+
+      - name: Lint
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "🛈 Skrip lint tiada; langkau."
+          fi
+
+      - name: Test
+        run: |
+          if npm run | grep -q "test"; then
+            npm test --silent
+          else
+            echo "🛈 Skrip test tiada; tandakan lulus sementara."
+          fi
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-${{ matrix.node-version }}
+          path: |
+            logs/**
+            coverage/**
+            junit.xml
+          if-no-files-found: ignore
