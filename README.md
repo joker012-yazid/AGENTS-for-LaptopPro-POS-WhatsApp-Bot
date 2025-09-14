@@ -53,6 +53,12 @@ AGENTS.md # panduan ejen Codex
 - (CI/Build) kebergantungan native untuk `better-sqlite3` (python3, make, g++)  
 - (WhatsApp) telefon untuk imbas QR
 
+## 🖼️ Screenshots
+
+| Dashboard | Backup | Form Settings |
+| --- | --- | --- |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Backup](docs/screenshots/backup.png) | ![Form Settings](docs/screenshots/form-settings.png) |
+
 ## ⚡ Persediaan cepat
 
 ```bash
@@ -136,7 +142,7 @@ Fail besar (XLSX/ZIP) dihantar secara streaming dan di-download dengan header ya
 Tentukan lesen (contoh: MIT/Apache-2.0). Tambah fail `LICENSE`.
 MIT License
 
-Copyright (c) YEAR NAME
+Copyright (c) 2025 joker012-yazid
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
