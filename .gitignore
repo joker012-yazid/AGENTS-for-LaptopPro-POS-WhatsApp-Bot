@@ -1,4 +1,18 @@
-node_modules
-coverage
+# Node/umum
+node_modules/
+coverage/
+npm-debug.log*
+yarn-error.log*
+
+# Secrets & env
 .env
-storage/wa-media/
+google-sa.json
+
+# SQLite runtime (biarkan migrations dalam repo)
+*.sqlite*
+db/app.sqlite
+
+# Direktori runtime/janaan
+auth/
+storage/
+logs/
