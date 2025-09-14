@@ -53,14 +53,17 @@ AGENTS.md # panduan ejen Codex
 - (CI/Build) kebergantungan native untuk `better-sqlite3` (python3, make, g++)  
 - (WhatsApp) telefon untuk imbas QR
 
-## ⚡ Persediaan Cepat
+## ⚡ Persediaan cepat
+
 ```bash
 npm ci
 node scripts/run-migrations.js
-node scripts/seed.js        # pilihan (data demo)
-cp .env.example .env        # edit nilai ikut persekitaran
+node scripts/seed.js   # pilihan (data demo)
+cp .env.example .env   # edit nilai ikut persekitaran
+```
 
 🔧 Konfigurasi (.env)
+```
 PORT=3000
 SQLITE_PATH=./db/app.sqlite
 
@@ -72,8 +75,10 @@ WA_AUTH_DIR=./auth
 DIALOGFLOW_PROJECT_ID=
 DIALOGFLOW_LANG=ms
 GOOGLE_APPLICATION_CREDENTIALS=./google-sa.json
+```
 
 🏃 Skrip NPM
+```
 "scripts": {
   "dev": "node server.js",
   "bot": "node bot/start.js",
@@ -82,87 +87,61 @@ GOOGLE_APPLICATION_CREDENTIALS=./google-sa.json
   "lint": "eslint .",
   "test": "jest --runInBand"
 }
+```
 
 ▶️ Menjalankan Aplikasi
+```
 npm run dev      # web UI di http://localhost:3000
 npm run bot      # terminal akan papar QR → imbas dengan WhatsApp
+```
 
 🔗 Endpoint Penting
-
-Backup
-
-GET /api/backup/customers.xlsx?from=YYYY-MM-DD&to=YYYY-MM-DD
-
-GET /api/backup/issues.zip?from&to&ticket&jid&search&hasMedia
-
-Form Settings
-
-GET /api/form-settings / POST /api/form-settings
-
-Invois
-
-GET /api/invoices/:id/pdf (preview sebelum “Hantar ke WhatsApp”)
+- Backup
+  - `GET /api/backup/customers.xlsx?from=YYYY-MM-DD&to=YYYY-MM-DD`
+  - `GET /api/backup/issues.zip?from&to&ticket&jid&search&hasMedia`
+- Form Settings
+  - `GET /api/form-settings / POST /api/form-settings`
+- Invois
+  - `GET /api/invoices/:id/pdf` (preview sebelum “Hantar ke WhatsApp”)
 
 Fail besar (XLSX/ZIP) dihantar secara streaming dan di-download dengan header yang sesuai (status badge di atas memantau CI untuk elak pecah). 
-GitHub Docs
 
 💬 Nota WhatsApp Bot
-
-Event utama: messages.upsert → simpan mesej ke whatsapp_messages (FTS5 untuk carian).
-
-downloadMediaMessage() digunakan untuk media; simpan ke storage/wa-media/<tahun>/.
-
-Regex tiket: LP-YYMMDD-XXXX (tautkan mesej ↔ tiket).
-
-Out-of-scope intent → masuk Queue “Perlu Balasan Manusia”.
+- Event utama: `messages.upsert` → simpan mesej ke `whatsapp_messages` (FTS5 untuk carian).
+- `downloadMediaMessage()` digunakan untuk media; simpan ke `storage/wa-media/<tahun>/`.
+- Regex tiket: `LP-YYMMDD-XXXX` (tautkan mesej ↔ tiket).
+- Out-of-scope intent → masuk Queue “Perlu Balasan Manusia”.
 
 🤖 Guna Codex Web
-
-Repo ini mengandungi AGENTS.md sebagai panduan ejen (tugas, SOP, guardrails).
-
-Di Codex Web, jalankan Setup script (npm ci → migrasi → test) dan gunakan task prompts yang disediakan dalam AGENTS.md.
-
-Tambah status badge di README untuk pantau CI (Actions → pilih workflow → Create status badge). 
-GitHub Docs
-+1
+- Repo ini mengandungi `AGENTS.md` sebagai panduan ejen (tugas, SOP, guardrails).
+- Di Codex Web, jalankan Setup script (npm ci → migrasi → test) dan gunakan task prompts yang disediakan dalam `AGENTS.md`.
+- Tambah status badge di README untuk pantau CI (Actions → pilih workflow → Create status badge). 
+  GitHub Docs
 
 🧩 Backup & Restore
-
-Excel pelanggan: view v_customer_latest_ticket → ExcelJS .xlsx
-
-ZIP perbualan WA: issues.json + chats/*.ndjson + media/* (archiver)
-
-Media & auth/ jangan commit (ada dalam .gitignore)
+- Excel pelanggan: view `v_customer_latest_ticket` → ExcelJS `.xlsx`
+- ZIP perbualan WA: `issues.json` + `chats/*.ndjson` + `media/*` (archiver)
+- Media & `auth/` jangan commit (ada dalam `.gitignore`)
 
 🧪 Pembangunan & Ujian
-
-Ujian API dengan Jest + Supertest.
-
-CI: .github/workflows/node-ci.yml (Node 18/20, migrasi, lint, test).
-Status ditunjuk oleh badge di atas. 
-GitHub Docs
+- Ujian API dengan Jest + Supertest.
+- CI: `.github/workflows/node-ci.yml` (Node 18/20, migrasi, lint, test).
+  Status ditunjuk oleh badge di atas. 
 
 🤝 Sumbangan (Contributing)
-
-Buka branch → PR ke main. PR mesti lulus Node CI.
-
-Ikut garis panduan di CONTRIBUTING.md (jika wujud). Seksyen Contributing dalam README ialah amalan disyorkan. 
-Make a README
+- Buka branch → PR ke `main`. PR mesti lulus Node CI.
+- Ikut garis panduan di `CONTRIBUTING.md` (jika wujud). Seksyen Contributing dalam README ialah amalan disyorkan. 
 
 📜 Lesen
-
-Tentukan lesen (contoh: MIT/Apache-2.0). Tambah fail LICENSE.
-
+Tentukan lesen (contoh: MIT/Apache-2.0). Tambah fail `LICENSE`.
 ---
 
 ### Kenapa ini cukup?
-- **GitHub** sarankan README menerangkan kegunaan & cara guna projek — kita dah lengkapkan dengan setup, run, dan API. :contentReference[oaicite:5]{index=5}  
-- **Status badge** diletakkan di README (amalan lazim Actions) — memudahkan semak CI. :contentReference[oaicite:6]{index=6}  
-- **Struktur/sekysen** selari cadangan *Standard Readme* + “Make a README” (Contributing, License, dsb.). :contentReference[oaicite:7]{index=7}  
-- **TOC automatik** akan muncul di GitHub apabila ada 2+ heading (ikon TOC di header fail). :contentReference[oaicite:8]{index=8}
-
-Kalau anda mahu, saya boleh tambah:
-- `CONTRIBUTING.md` + `CODE_OF_CONDUCT.md` templat,
-- tangkapan skrin UI (Dashboard/Backup/Form Settings) untuk dimasukkan di README,
-- jadual kecil **endpoint** yang lebih lengkap (POS/produk/invois).
-::contentReference[oaicite:9]{index=9}
+- GitHub mengesyorkan README menerangkan kegunaan & cara guna projek—termasuk cara pasang dan jalankan. Rujuk “About the repository README file”.  
+  Lihat: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes
+- Meletakkan **status badge** GitHub Actions di README ialah amalan lazim untuk memantau CI.  
+  Lihat: https://docs.github.com/actions/managing-workflow-runs/adding-a-workflow-status-badge
+- Struktur/sekysen adalah seiring panduan umum seperti **Standard Readme** dan **Make a README**.  
+  Lihat: https://github.com/RichardLitt/standard-readme , https://www.makeareadme.com/
+- GitHub juga **jana TOC automatik** bila ada ≥2 heading (ikon “list” di atas README).  
+  Lihat: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes
